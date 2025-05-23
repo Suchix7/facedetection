@@ -2,6 +2,9 @@
 // Disable error reporting for warnings
 error_reporting(E_ALL & ~E_WARNING);
 
+// Set timezone to Asia/Kathmandu
+date_default_timezone_set('Asia/Kathmandu');
+
 header('Content-Type: application/json');
 
 // Check if image was uploaded
@@ -73,25 +76,24 @@ if (file_exists($attendanceFile)) {
     $records = json_decode(file_get_contents($attendanceFile), true);
 }
 
-// Check if attendance already marked today
-$today = date('Y-m-d');
-$alreadyMarked = false;
-foreach ($records as $record) {
-    if (
-        isset($record['student_id']) &&
-        $record['student_id'] === $result['student_id'] &&
-        date('Y-m-d', strtotime($record['time'])) === $today
-    ) {
-        $alreadyMarked = true;
+// Check if 5 seconds have passed since last attendance
+$currentTime = time();
+$lastAttendanceTime = 0;
+
+// Find the last attendance time for this student
+foreach (array_reverse($records) as $record) {
+    if (isset($record['student_id']) && $record['student_id'] === $result['student_id']) {
+        $lastAttendanceTime = strtotime($record['time']);
         break;
     }
 }
 
-if ($alreadyMarked) {
+// If less than 5 seconds have passed, return early
+if (($currentTime - $lastAttendanceTime) < 5) {
     echo json_encode([
         'success' => true,
         'name' => $studentInfo['name'],
-        'message' => 'Attendance already marked for today',
+        'message' => 'Please wait 5 seconds before marking attendance again',
         'face_location' => $result['face_location'] ?? null,
         'records' => $records
     ]);

@@ -61,7 +61,8 @@ def train_lbph_model(student_id):
             for existing_id, label in labels.items():
                 existing_dir = f'students/{existing_id}'
                 if os.path.exists(existing_dir):
-                    for i in range(1, 6):  # 5 face images per student
+                    logging.info(f"Loading existing student data for ID: {existing_id}")
+                    for i in range(1, 11):  # 10 face images per student
                         face_path = f'{existing_dir}/face_{i}.jpg'
                         if os.path.exists(face_path):
                             img = cv2.imread(face_path)
@@ -69,7 +70,13 @@ def train_lbph_model(student_id):
                                 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                                 gray = cv2.equalizeHist(gray)
                                 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-                                faces = face_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=3)
+                                faces = face_cascade.detectMultiScale(
+                                    gray,
+                                    scaleFactor=1.05,
+                                    minNeighbors=3,
+                                    minSize=(30, 30),
+                                    maxSize=(300, 300)
+                                )
                                 if len(faces) > 0:
                                     x, y, w, h = faces[0]
                                     face_roi = gray[y:y+h, x:x+w]
@@ -77,6 +84,7 @@ def train_lbph_model(student_id):
                                     face_roi = cv2.GaussianBlur(face_roi, (5, 5), 0)
                                     all_face_images.append(face_roi)
                                     all_face_labels.append(label)
+                                    logging.info(f"Added existing face {i} for student {existing_id}")
         else:
             logging.info("Creating new model")
             recognizer = cv2.face.LBPHFaceRecognizer_create(
@@ -89,7 +97,7 @@ def train_lbph_model(student_id):
 
         # Process new student's face images
         face_count = 0
-        for i in range(1, 6):  # 5 face images per student
+        for i in range(1, 11):  # 10 face images per student
             face_path = f'{student_dir}/face_{i}.jpg'
             if os.path.exists(face_path):
                 logging.info(f"Processing face image {i}")
@@ -133,6 +141,7 @@ def train_lbph_model(student_id):
             return {'success': False, 'message': 'No valid face images found'}
 
         logging.info(f"Processed {face_count} valid face images for new student")
+        logging.info(f"Total training samples: {len(all_face_images)}")
 
         # Update labels
         labels[student_id] = next_label

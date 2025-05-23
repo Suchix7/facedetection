@@ -46,10 +46,11 @@
                 <div class="status-container">
                     <div id="status" class="status">Status: Camera not started</div>
                     <div id="captureStatus" class="capture-status"></div>
+                    <div class="capture-info">Please capture 10 different face angles for better recognition</div>
                 </div>
 
                 <div class="captured-faces">
-                    <h3>Captured Faces</h3>
+                    <h3>Captured Faces (10 required)</h3>
                     <div id="faceList" class="face-list"></div>
                 </div>
 

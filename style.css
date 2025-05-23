@@ -176,3 +176,14 @@ video {
 .toast-error {
   background: #f44336;
 }
+
+.capture-info {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  color: #495057;
+  font-size: 14px;
+  text-align: center;
+}
